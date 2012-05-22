@@ -1,0 +1,5 @@
+
+
+
+ensemblesFrequents :: (Eq a) => Integer -> [a] -> [[a]]
+ensemblesFrequents taille donnees = 
