@@ -13,8 +13,8 @@ memberp itemset transaction =  foldl (\a e -> a && (e `elem` transaction)) True 
 clean liste = foldl (\a e -> if or (map (e `memberp`) a) then a else (e:a)) [] liste
 
 -- Calcule le support d'un ensemble d'items dans une base de transactions
-support :: (Eq a) => Itemset a -> [Transaction a] -> Int
-support itemset transactions = length [t | t <- transactions, itemset  `memberp` t]
+support                      :: (Eq a) => Itemset a -> [Transaction a] -> Int
+support itemset transactions =  length [t | t <- transactions, itemset  `memberp` t]
 
 -- Récupère la liste des éléments présents dans une liste
 getContent l = getContent' l []
