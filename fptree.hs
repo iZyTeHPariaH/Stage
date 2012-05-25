@@ -10,6 +10,9 @@ data FPTree a = FPTree a (Array Integer (FPTree a))
               deriving (Show,Eq)
 
 
+getVal (FPTree x _) = x
+getVal (Node x) = x
+
 {- Accesseurs et modificateurs d'états -}
 getS :: State a a
 getS = state $ \s -> (s,s)
@@ -34,6 +37,17 @@ getNodeVal = do
     Node x -> return x
     FPTree x _ -> return x
     
+
+-- Supprime le noeud comportant le symbole spécifié.
+removeNode :: (Eq a) => a -> State (FPTree a) Bool
+removeNode sym = do 
+  currentTree <- getS
+  case currentTree of
+    Node _ -> return False
+    FPTree val tr -> let (l,u) = bounds (tr)
+                         new  = [arbre | arbre <- elems tr, getVal arbre /= sym] in
+                     do putS $ FPTree val (listArray (l,u-1) new)
+                        return True
 
 {- Action représentant un déplacement dans un arbre en spécifiant la valeur d'un noeud.
    La fonction renvoie Just () si elle réussit, et Nothing si le noeud n'est pas trouvé 
@@ -61,8 +75,8 @@ type Mark a = (Direction a,FPTree a)
 
 {-Permet de se déplacer dans l'arbre :
   avance d'un noeud, et rajoute le résultat à la liste des marques existantes -}
-goToNextNode :: (Eq a) => a -> [Mark a] -> State (FPTree a) ([Mark a])
-goToNextNode sym path = do 
+goToNextNode          :: (Eq a) => a -> [Mark a] -> State (FPTree a) ([Mark a])
+goToNextNode sym path =  do 
   currentState <- getS
   val <- getNodeVal
   loadNode sym
@@ -70,6 +84,11 @@ goToNextNode sym path = do
 
 {-Permet de se déplacer dans l'arbre en spécifiant
   une liste de symboles -}
-goToNode :: (Eq a) => [a] -> State (FPTree a) [Mark a]
-goToNode symlist = foldM (flip goToNextNode) [] symlist    
+goToNode         :: (Eq a) => [a] -> State (FPTree a) [Mark a]
+goToNode symlist =  foldM (flip goToNextNode) [] symlist    
 
+back1 :: (Eq a) => [Mark a] -> State (FPTree a) [Mark a]
+back1 marks = do
+  currentTree <- getS
+  let (sym,tree) = head marks 
+  return marks
