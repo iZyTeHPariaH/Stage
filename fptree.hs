@@ -76,19 +76,21 @@ type Mark a = (Direction a,FPTree a)
 {-Permet de se déplacer dans l'arbre :
   avance d'un noeud, et rajoute le résultat à la liste des marques existantes -}
 goToNextNode          :: (Eq a) => a -> [Mark a] -> State (FPTree a) ([Mark a])
-goToNextNode sym path =  do 
-  currentState <- getS
+goToNextNode sym path =  do   
+  currentState <- getS    
+  removeNode sym
+  newState <- getS
   val <- getNodeVal
-  loadNode sym
-  return $ (val,currentState):path
+  putS currentState
+  return $ (val,newState):path
 
 {-Permet de se déplacer dans l'arbre en spécifiant
-  une liste de symboles -}
+  une liste de symboles-}
 goToNode         :: (Eq a) => [a] -> State (FPTree a) [Mark a]
 goToNode symlist =  foldM (flip goToNextNode) [] symlist    
 
 back1 :: (Eq a) => [Mark a] -> State (FPTree a) [Mark a]
 back1 marks = do
   currentTree <- getS
-  let (sym,tree) = head marks 
-  return marks
+  let (sym,FPTree val ct) = head marks 
+  putS $ FPTree sym (listArray)

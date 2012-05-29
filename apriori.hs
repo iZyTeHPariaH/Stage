@@ -1,5 +1,4 @@
 import Data.List
-
 type Transaction a = [a]
 type Itemset a = [a]
 
@@ -16,7 +15,7 @@ clean liste = foldl (\a e -> if or (map (e `memberp`) a) then a else (e:a)) [] l
 support                      :: (Eq a) => Itemset a -> [Transaction a] -> Int
 support itemset transactions =  length [t | t <- transactions, itemset  `memberp` t]
 
--- Récupère la liste des éléments présents dans une liste
+-- Récupère la liste exhaustive des éléments présents dans une liste de transactions
 getContent l = getContent' l []
 getContent' [] acc = acc
 getContent' (x:xs) acc = getContent' xs (foldl f acc x)
@@ -24,9 +23,10 @@ getContent' (x:xs) acc = getContent' xs (foldl f acc x)
 
 
 -- Ensembles fréquents de taille inférieure ou égale à n (ensembles fréquents pour chaque n)
-ensemblesFreq 1 transactions itemset minsupp = [[[item] | item <- itemset, support [item] transactions >= minsupp]] 
-ensemblesFreq n transactions itemset minsupp = ((clean ensemblesN):ensemblesN_1)
-    where ensemblesN_1 = ensemblesFreq (n-1) transactions itemset minsupp
+ensemblesFreq 1 transactions minsupp = [[[item] | item <- itemset, support [item] transactions >= minsupp]] 
+    where itemset = getContent transactions
+ensemblesFreq n transactions minsupp = ((clean ensemblesN):ensemblesN_1)
+    where ensemblesN_1 = ensemblesFreq (n-1) transactions minsupp
           ensemblesN = [ret | i <- candidats,
                               e <- head ensemblesN_1,
                               not (i `elem` e),
